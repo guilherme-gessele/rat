@@ -1,22 +1,7 @@
-use clap::{Args, Parser};
+use clap::Parser;
+use rat::cli::Cli;
 use rat::Paths;
 use std::process;
-
-#[derive(Parser, Debug)]
-#[command(author, version, about, long_about = None)]
-struct Cli {
-    #[command(flatten)]
-    command: Command,
-
-    files: Vec<String>,
-}
-
-#[derive(Args, Debug)]
-struct Command {
-    /// display $ at end of each line
-    #[arg(short = 'E', long, default_value_t = false)]
-    show_ends: bool,
-}
 
 fn main() {
     let cli = Cli::parse();
@@ -29,7 +14,7 @@ fn main() {
         }
     };
 
-    if let Err(err) = rat::run(paths) {
+    if let Err(err) = rat::run(paths, cli.command) {
         rat::err(err)
     }
 }

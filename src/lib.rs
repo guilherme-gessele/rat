@@ -1,6 +1,10 @@
+pub mod cli;
+
 use std::error::Error;
 use std::fs;
 use std::path::PathBuf;
+
+use cli::Command;
 
 pub type Paths = Vec<Box<PathBuf>>;
 
@@ -20,7 +24,7 @@ pub fn parse(files: Vec<String>) -> Result<Paths, &'static str> {
     Ok(paths)
 }
 
-pub fn run(paths: Paths) -> Result<(), Box<dyn Error>> {
+pub fn run(paths: Paths, params: cli::Command) -> Result<(), Box<dyn Error>> {
     for path in paths {
         let path = path.as_path();
 
@@ -32,7 +36,7 @@ pub fn run(paths: Paths) -> Result<(), Box<dyn Error>> {
         }
 
         let content = match fs::read_to_string(path) {
-            Ok(content) => content,
+            Ok(content) => parse_content(content, &params),
             Err(err) => format!("rat: Unable to read file {0}: {1}", display, err),
         };
 
@@ -40,6 +44,16 @@ pub fn run(paths: Paths) -> Result<(), Box<dyn Error>> {
     }
 
     Ok(())
+}
+
+fn parse_content(content: String, args: &Command) -> String {
+    let response = if args.show_ends {
+        content.replace("\n", "$\n")
+    } else {
+        content
+    };
+
+    response
 }
 
 pub fn err(err: Box<dyn Error>) {
